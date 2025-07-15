@@ -1,0 +1,14 @@
+# .env file
+.env
+
+# virtual environment
+.venv/
+
+# Pycache
+__pycache__/
+
+# Log files
+*.log
+
+# data files
+/data/
