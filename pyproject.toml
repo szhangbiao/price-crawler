@@ -3,7 +3,8 @@ name = "price-crawler"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.13"
+# 兼容 Mac 里python的3.12版本
+requires-python = ">=3.12"
 dependencies = [
     "beautifulsoup4>=4.13.4",
     "lxml>=6.0.0",
