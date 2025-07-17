@@ -70,7 +70,7 @@ def get_gold_price_from_juhe():
                     'change': change,
                     'change_percent': change_percent,
                     'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'update_time': gold_data['time']
+                    'update': gold_data['time']
                 }
             else:
                 logger.warning("未找到Au99.99黄金价格数据")

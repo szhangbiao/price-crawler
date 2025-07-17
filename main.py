@@ -48,7 +48,7 @@ def fetch_gold_price(scheduler, gold_data):
     gold_info = get_gold_price()
     scheduler.update_fetch_time('gold')
     if gold_info:
-        print(f"黄金价格: {gold_info['price']} 元/克 | 涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%" )
+        print(f"黄金价格: {gold_info['price']} 元/克 | 涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%  | 更新时间: {gold_info['update']}" )
         gold_data.loc[len(gold_data)] = gold_info
         return True
     return False
@@ -131,7 +131,7 @@ def monitor_prices(intervals):
     """监控价格变动
     
     Args:
-        intervals (dict): 包含各类资产监控间隔的字典, e.g. {'gold': 60, 'indices': 120, 'exchange_rate': 300}
+        intervals (dict): 包含各类资产监控间隔的字典, e.g. {'gold': 1800, 'indices': 60, 'exchange_rate': 1800}
     """
     logger.info("开始监控黄金价格、中美汇率和A股大盘指数...")
     logger.info(f"监控间隔: 黄金 {intervals.get('gold', 'N/A')}s, 股指 {intervals.get('indices', 'N/A')}s, 汇率 {intervals.get('exchange_rate', 'N/A')}s")
@@ -200,9 +200,9 @@ def main():
     
     # 设置不同资产的监控间隔（单位：秒）
     intervals = {
-        'gold': 60,          # 每60秒获取一次黄金价格
+        'gold': 30 * 60,          # 每半小时获取一次黄金价格
         'indices': 60,      # 每60秒获取一次股指
-        'exchange_rate': 60 * 60 # 每1小时获取一次汇率
+        'exchange_rate': 30 * 60 # 每半小时获取一次汇率
     }
     monitor_prices(intervals)
 
