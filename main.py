@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 
 # 本地模块导入
-from stock_indices import get_all_indices
+from stock import get_all_indices
 from gold_price import get_gold_price
 from exchange_rate import get_exchange_rate
 from data_storage import CsvStorage
