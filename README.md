@@ -14,7 +14,7 @@
 ## 环境要求
 
 -   Python 3.13+
--   依赖包：requests, pandas
+-   依赖包：requests, pandas, python-dotenv
 
 ## 使用 uv 初始化项目的步骤
 
@@ -36,18 +36,20 @@
 
 3. **添加项目依赖**
     ```bash
-    uv add requests pandas
+    uv add requests pandas python-dotenv
     ```
-    这个命令将 requests 和 pandas 库添加到项目依赖中，并更新了`pyproject.toml`文件。
+    这个命令将 requests、pandas 和 python-dotenv 库添加到项目依赖中，并更新了`pyproject.toml`文件。
 
 ## 项目文件结构
 
 ```
 ├── .python-version    # Python版本信息
 ├── .venv/             # 虚拟环境目录
+├── .env               # 环境变量配置文件（API密钥等）
 ├── data/              # 数据存储目录
 │   ├── gold_price_data.csv    # 黄金价格数据
-│   └── stock_indices_data.csv # 多个股指数据
+│   ├── stock_indices_data.csv # 多个股指数据
+│   └── exchange_rate_data.csv # 中美汇率数据
 ├── README.md          # 项目说明文档
 ├── main.py            # 主程序代码
 ├── gold_price.py      # 黄金价格数据获取模块
@@ -74,6 +76,30 @@ cd price-crawler
 ```bash
 uv sync
 ```
+
+3. 配置 API 密钥
+
+在项目根目录下创建或编辑`.env`文件，添加以下配置：
+
+```
+# 美心智能平台秘钥（用于汇率数据）
+MXNZP_APP_ID=your_mxnzp_app_id
+MXNZP_APP_SECRET=your_mxnzp_app_secret
+
+# 极速数据API密钥（用于黄金价格数据）
+JISUAPI_APPKEY=your_jisuapi_appkey
+
+# 聚合数据API密钥（黄金价格数据备用API）
+JUHE_APPKEY=your_juhe_appkey
+```
+
+### 获取 API 密钥
+
+-   **MXNZP 平台**：访问 [https://www.mxnzp.com](https://www.mxnzp.com) 注册并获取 APP_ID 和 APP_SECRET
+-   **极速数据**：访问 [https://www.jisuapi.com/api/gold/](https://www.jisuapi.com/api/gold/) 注册并获取 APPKEY
+-   **聚合数据**：访问 [http://web.juhe.cn:8080/finance/gold/shgold](http://web.juhe.cn:8080/finance/gold/shgold) 注册并获取 APPKEY
+
+> 注意：如果未配置 API 密钥或 API 调用失败，程序将使用备用的模拟数据
 
 ## 使用方法
 
@@ -109,9 +135,11 @@ uv run main.py
 
 您可以修改以下设置来自定义程序行为：
 
--   监控间隔：修改 `main.py` 中的 `monitor_prices(interval=60)` 参数值
+-   监控间隔：修改 `main.py` 中的 `intervals` 字典，可以为不同类型的数据设置不同的获取间隔
 -   数据存储路径：修改 `main.py` 中的 `DATA_DIR` 常量
 -   日志级别：修改 `logging.basicConfig()` 中的 `level` 参数
+-   API 密钥：修改 `.env` 文件中的相应配置项
+-   黄金价格数据源：默认会按照极速数据 API → 聚合数据 API → 模拟数据的顺序尝试获取数据，您可以在 `gold_price.py` 中修改这个顺序
 
 ## 代码最佳实践
 
