@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 """
-黄金价格和A股大盘指数监控程序
+、中美汇率和A股大盘指数监控程序
 
-该程序用于监控黄金价格和A股大盘指数的变动，并将数据保存到CSV文件中。
+该程序用于监控黄金价格、中美汇率和A股大盘指数的变动，并将数据保存到CSV文件中。
 """
 
 # 标准库导入
@@ -17,6 +17,7 @@ from stock_indices import get_all_indices
 from gold_price import get_gold_price
 from exchange_rate import get_exchange_rate
 from data_storage import CsvStorage
+from scheduler import Scheduler
 
 
 # 配置日志记录
@@ -31,18 +32,108 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+def fetch_gold_price(scheduler, gold_data):
+    """获取黄金价格数据
+    
+    Args:
+        scheduler (Scheduler): 调度器实例
+        gold_data (DataFrame): 黄金价格数据DataFrame
+        
+    Returns:
+        bool: 是否成功获取并更新数据
+    """
+    if not scheduler.should_fetch('gold'):
+        return False
+        
+    gold_info = get_gold_price()
+    scheduler.update_fetch_time('gold')
+    if gold_info:
+        print(f"黄金价格: {gold_info['price']} 元/克 | 涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%" )
+        gold_data.loc[len(gold_data)] = gold_info
+        return True
+    return False
+
+
+def fetch_stock_indices(scheduler, indices_data):
+    """获取股指数据
+    
+    Args:
+        scheduler (Scheduler): 调度器实例
+        indices_data (DataFrame): 股指数据DataFrame
+        
+    Returns:
+        bool: 是否成功获取并更新数据
+    """
+    if not scheduler.should_fetch('indices'):
+        return False
+        
+    all_indices = get_all_indices()
+    scheduler.update_fetch_time('indices')
+    if all_indices:
+        for index_info in all_indices:
+            print(f"{index_info['name']}: {index_info['price']} | 涨跌: {index_info['change']} | 涨跌幅: {index_info['change_percent']}%" )
+            indices_data.loc[len(indices_data)] = index_info
+        return True
+    else:
+        logger.info("当前为休市时间，不获取股指数据。")
+        return False
+
+
+def fetch_exchange_rate(scheduler, exchange_rate_data, error_counts, max_retries):
+    """获取中美汇率数据
+    
+    Args:
+        scheduler (Scheduler): 调度器实例
+        exchange_rate_data (DataFrame): 汇率数据DataFrame
+        error_counts (dict): 错误计数字典
+        max_retries (int): 最大重试次数
+        
+    Returns:
+        tuple: (是否成功获取并更新数据, 是否应该停止监控)
+    """
+    if not scheduler.should_fetch('exchange_rate'):
+        return False, False
+        
+    exchange_rate_info = get_exchange_rate()
+    scheduler.update_fetch_time('exchange_rate')
+    if exchange_rate_info:
+        print(f"汇率: {exchange_rate_info['name']} | 描述: {exchange_rate_info['desc']} | 价格: {exchange_rate_info['price']} | 更新时间: {exchange_rate_info['update']}")
+        exchange_rate_data.loc[len(exchange_rate_data)] = exchange_rate_info
+        error_counts['exchange_rate'] = 0  # 成功后重置计数器
+        return True, False
+    else:
+        error_counts['exchange_rate'] += 1
+        logger.warning(f"获取汇率数据失败，尝试次数: {error_counts['exchange_rate']}")
+        if error_counts['exchange_rate'] >= max_retries:
+            logger.error("获取汇率数据连续失败次数过多，停止监控。")
+            return False, True  # 返回失败且应该停止监控
+        return False, False
+
+
+def save_data(storage, gold_data, indices_data, exchange_rate_data):
+    """保存所有数据到存储
+    
+    Args:
+        storage (CsvStorage): 存储实例
+        gold_data (DataFrame): 黄金价格数据
+        indices_data (DataFrame): 股指数据
+        exchange_rate_data (DataFrame): 汇率数据
+    """
+    try:
+        storage.save(gold_data, indices_data, exchange_rate_data)
+        logger.debug("数据已成功保存")
+    except Exception as e:
+        logger.error(f"保存数据时出错: {e}")
+
+
+
 def monitor_prices(intervals):
     """监控价格变动
     
     Args:
         intervals (dict): 包含各类资产监控间隔的字典, e.g. {'gold': 60, 'indices': 120, 'exchange_rate': 300}
     """
-    """监控价格变动
-    
-    Args:
-        interval: 监控间隔，单位为秒
-    """
-    logger.info("开始监控黄金价格、汇率和A股大盘指数...")
+    logger.info("开始监控黄金价格、中美汇率和A股大盘指数...")
     logger.info(f"监控间隔: 黄金 {intervals.get('gold', 'N/A')}s, 股指 {intervals.get('indices', 'N/A')}s, 汇率 {intervals.get('exchange_rate', 'N/A')}s")
     print("-" * 50)
     
@@ -52,11 +143,9 @@ def monitor_prices(intervals):
     # 加载已存在的数据
     gold_data, indices_data, exchange_rate_data = storage.load()
     
-    last_fetch_times = {
-        'gold': 0,
-        'indices': 0,
-        'exchange_rate': 0
-    }
+    # 初始化调度器
+    scheduler = Scheduler(intervals)
+
     error_counts = {
         'gold': 0,
         'indices': 0,
@@ -66,49 +155,27 @@ def monitor_prices(intervals):
 
     try:
         while True:
-            current_time = time.time()
             data_updated = False
 
             # 获取黄金价格
-            if current_time - last_fetch_times['gold'] >= intervals.get('gold', 60):
-                gold_info = get_gold_price()
-                last_fetch_times['gold'] = current_time
-                if gold_info:
-                    print(f"黄金价格: {gold_info['price']} 元/克 | 涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%" )
-                    gold_data.loc[len(gold_data)] = gold_info
-                    data_updated = True
+            gold_updated = fetch_gold_price(scheduler, gold_data)
+            data_updated = data_updated or gold_updated
 
             # 获取所有股指数据
-            if current_time - last_fetch_times['indices'] >= intervals.get('indices', 60):
-                all_indices = get_all_indices()
-                last_fetch_times['indices'] = current_time
-                if all_indices:
-                    for index_info in all_indices:
-                        print(f"{index_info['name']}: {index_info['price']} | 涨跌: {index_info['change']} | 涨跌幅: {index_info['change_percent']}%" )
-                        indices_data.loc[len(indices_data)] = index_info
-                    data_updated = True
-
+            indices_updated = fetch_stock_indices(scheduler, indices_data)
+            data_updated = data_updated or indices_updated
 
             # 获取汇率数据
-            if current_time - last_fetch_times['exchange_rate'] >= intervals.get('exchange_rate', 60*60):
-                exchange_rate_info = get_exchange_rate()
-                if exchange_rate_info:
-                    print(f"汇率: {exchange_rate_info['name']} | 描述: {exchange_rate_info['desc']} | 价格: {exchange_rate_info['price']} | 更新时间: {exchange_rate_info['update']}")
-                    exchange_rate_data.loc[len(exchange_rate_data)] = exchange_rate_info
-                    last_fetch_times['exchange_rate'] = current_time
-                    error_counts['exchange_rate'] = 0  # 成功后重置计数器
-                    data_updated = True
-                else:
-                    error_counts['exchange_rate'] += 1
-                    logger.warning(f"获取汇率数据失败，尝试次数: {error_counts['exchange_rate']}")
-                    if error_counts['exchange_rate'] >= MAX_RETRIES:
-                        logger.error("获取汇率数据连续失败次数过多，停止该次监控。")
-                        last_fetch_times['exchange_rate'] = current_time
+            exchange_updated, should_stop = fetch_exchange_rate(scheduler, exchange_rate_data, error_counts, MAX_RETRIES)
+            data_updated = data_updated or exchange_updated
+            
+            if should_stop:
+                break
 
             if data_updated:
                 print(f"更新时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
                 print("-" * 50)
-                storage.save(gold_data, indices_data, exchange_rate_data)
+                save_data(storage, gold_data, indices_data, exchange_rate_data)
 
             # 短暂休眠以避免CPU占用过高
             time.sleep(1)
@@ -116,17 +183,17 @@ def monitor_prices(intervals):
     except KeyboardInterrupt:
         logger.info("\n监控已停止")
         # 保存最终数据
-        storage.save(gold_data, indices_data, exchange_rate_data)
+        save_data(storage, gold_data, indices_data, exchange_rate_data)
         logger.info(f"数据已保存")
     except Exception as e:
         logger.error(f"监控过程中出错: {e}")
         # 尝试保存已收集的数据
-        storage.save(gold_data, indices_data, exchange_rate_data)
+        save_data(storage, gold_data, indices_data, exchange_rate_data)
 
 
 def main():
     """主函数"""
-    print("黄金价格、汇率和A股大盘指数监控程序")
+    print("黄金价格、中美汇率和A股大盘指数监控程序")
     print("==============================")
     print("按 Ctrl+C 停止监控")
     print()
