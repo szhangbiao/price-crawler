@@ -15,9 +15,9 @@ from datetime import datetime
 import pandas as pd
 
 # 本地模块导入
-from data_storage import CsvStorage, Storage
+from storage import CsvStorage, Storage
 from exchange_rate import get_exchange_rate
-from gold_price import get_gold_price
+from gold import get_gold_price
 from scheduler import Scheduler
 from stock import get_all_indices
 
@@ -47,7 +47,7 @@ def fetch_gold_price(scheduler: Scheduler, gold_data: pd.DataFrame) -> bool:
     scheduler.update_fetch_time("gold")
     if gold_info:
         print(
-            f"黄金价格: {gold_info['price']} 元/克 | 涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%  | 更新时间: {gold_info['update']}"
+            f"黄金价格: {gold_info['price']} 元/克 | 涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%  | 更新时间: {gold_info.get('update_time', gold_info.get('update', '未知'))}"
         )
         gold_data.loc[len(gold_data)] = gold_info
         return True

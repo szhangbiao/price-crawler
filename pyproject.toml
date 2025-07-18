@@ -69,4 +69,4 @@ convention = "google"  # 使用 Google 风格的文档字符串
 
 # isort 配置
 [tool.ruff.lint.isort]
-known-first-party = ["stock", "gold_price", "exchange_rate", "data_storage", "scheduler"]
+known-first-party = ["stock", "gold", "exchange_rate", "storage", "scheduler"]

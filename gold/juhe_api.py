@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 
 """
-黄金价格数据获取模块.
+聚合数据API黄金价格获取模块.
 
-这个模块提供了获取黄金价格的功能。
-使用多个来源获取实时黄金价格数据。
-如果所有API调用失败，将使用备用方法获取数据。
+这个模块提供了从聚合数据API获取黄金价格的功能。
+如果API调用失败，将使用备用方法获取数据。
 """
 
 # 标准库导入
@@ -16,9 +15,6 @@ from datetime import datetime
 
 import requests
 from dotenv import load_dotenv
-
-# 导入爬虫模块
-from gold.gold_crawler import get_gold_price as get_gold_price_from_crawler
 
 # 加载环境变量
 load_dotenv()
@@ -124,40 +120,6 @@ def get_gold_price_fallback() -> dict | None:
         return None
 
 
-def get_gold_price() -> dict | None:
-    """
-    获取黄金价格.
-
-    首先尝试从爬虫获取，如果失败则尝试从聚合数据API获取，
-    如果两者都失败则使用备用的模拟数据方法。
-
-    Returns:
-        dict | None: 包含价格、涨跌额、涨跌幅和时间的字典，如果出错则返回None。
-    """
-    try:
-        # 首先尝试从爬虫获取
-        logger.debug("尝试从爬虫获取黄金价格")
-        gold_info = get_gold_price_from_crawler()
-        if gold_info:
-            logger.info("成功从爬虫获取黄金价格，数据来源: %s", gold_info.get('source', '未知'))
-            return gold_info
-
-        # 如果失败，尝试从聚合数据API获取
-        logger.debug("尝试从聚合数据API获取黄金价格")
-        gold_info = get_gold_price_from_juhe()
-        if gold_info:
-            logger.info("成功从聚合数据API获取黄金价格")
-            return gold_info
-
-        # 如果两者都失败，使用备用的模拟数据方法
-        logger.warning("无法从API获取黄金价格，使用备用方法")
-        return get_gold_price_fallback()
-    except Exception as e:  # pylint: disable=broad-except
-        # 捕获所有异常并回退到模拟数据，确保程序能继续运行
-        logger.error("获取黄金价格时出错: %s", e)
-        return get_gold_price_fallback()
-
-
 # 测试代码
 if __name__ == "__main__":
     # 配置日志
@@ -167,23 +129,26 @@ if __name__ == "__main__":
         handlers=[logging.StreamHandler(), logging.FileHandler("gold_price.log", encoding="utf-8")],
     )
 
-    print("黄金价格数据获取测试")
+    print("聚合数据API黄金价格获取测试")
     print("-" * 50)
 
     # 测试获取黄金价格
-    gold_info = get_gold_price()
+    gold_info = get_gold_price_from_juhe()
     if gold_info:
         print(f"黄金价格: {gold_info['price']} 元/克")
         print(f"涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%")
         print(f"更新时间: {gold_info.get('update_time', '未知')}")
-
-        # 显示数据来源
-        if gold_info.get("is_fallback"):
-            print("数据来源: 模拟数据（备用方法）")
-        else:
-            print(f"数据来源: {gold_info.get('source', '实时API数据')}")
+        print(f"数据来源: {gold_info.get('source', '聚合数据API')}")
     else:
-        print("获取黄金价格失败")
+        print("从聚合数据API获取黄金价格失败，尝试备用方法")
+        gold_info = get_gold_price_fallback()
+        if gold_info:
+            print(f"黄金价格: {gold_info['price']} 元/克")
+            print(f"涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%")
+            print(f"更新时间: {gold_info.get('update_time', '未知')}")
+            print(f"数据来源: {gold_info.get('source', '模拟数据')}")
+        else:
+            print("获取黄金价格失败")
 
     print("-" * 50)
     print("提示: 请在.env文件中配置有效的API密钥以获取实时数据")

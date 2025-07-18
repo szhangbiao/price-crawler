@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
-"""汇率数据获取模块.
+"""
+汇率数据API调用模块.
 
-这个模块提供了获取美元对人民币汇率的功能。
-使用聚合数据API和美心智能平台API获取实时汇率数据。
-如果主要API调用失败，将使用备用API获取数据。
+这个模块提供了从不同API获取美元对人民币汇率的功能。
+包括聚合数据API和美心智能平台API的调用实现。
 """
 
 import logging
@@ -66,21 +66,21 @@ def get_exchange_rate_from_juhe() -> dict | None:
                     "update": usd_cny_data.get("updateTime", current_time),
                     "source": "聚合数据",
                 }
-                logging.info("成功从聚合数据获取汇率数据：%s = %s", rate_data['name'],rate_data['price'])
+                logging.info("成功从聚合数据获取汇率数据：%s = %s", rate_data['name'], rate_data['price'])
                 return rate_data
             else:
                 logging.error("在聚合数据API返回中未找到USD/CNY汇率数据")
                 return None
         else:
-            logging.error("聚合数据API返回错误: %s",data.get('reason'))
+            logging.error("聚合数据API返回错误: %s", data.get('reason'))
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error("请求聚合数据API时发生网络错误: %s",e)
+        logging.error("请求聚合数据API时发生网络错误: %s", e)
         return None
     except Exception as e:  # pylint: disable=broad-except
         # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
-        logging.error("从聚合数据获取汇率数据时发生未知错误: %s",e)
+        logging.error("从聚合数据获取汇率数据时发生未知错误: %s", e)
         return None
 
 
@@ -110,21 +110,21 @@ def get_exchange_rate_from_mxnzp() -> dict | None:
                 "update": item["updateTime"],
                 "source": "美心智能平台",
             }
-            logging.info("成功从美心智能平台获取汇率数据：%s",rate_data['name'] - rate_data['price'])
+            logging.info("成功从美心智能平台获取汇率数据：%s = %s", rate_data['name'], rate_data['price'])
             return rate_data
         else:
-            logging.error("美心智能平台API返回错误: %s",data.get('msg'))
+            logging.error("美心智能平台API返回错误: %s", data.get('msg'))
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error("请求美心智能平台API时发生网络错误: %s",e)
+        logging.error("请求美心智能平台API时发生网络错误: %s", e)
         return None
     except (ValueError, TypeError, KeyError) as e:
-        logging.error("处理美心智能平台数据时出错: %s",e)
+        logging.error("处理美心智能平台数据时出错: %s", e)
         return None
     except Exception as e:  # pylint: disable=broad-except
         # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
-        logging.error("从美心智能平台获取汇率数据时发生未知错误: %s",e)
+        logging.error("从美心智能平台获取汇率数据时发生未知错误: %s", e)
         return None
 
 
