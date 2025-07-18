@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-"""汇率数据获取模块。
+"""汇率数据获取模块.
 
 这个模块提供了获取美元对人民币汇率的功能。
 使用聚合数据API和美心智能平台API获取实时汇率数据。
@@ -30,7 +30,7 @@ JUHE_URL = "http://op.juhe.cn/onebox/exchange/currency?key={}&from=USD&to=CNY&ve
 
 
 def get_exchange_rate_from_juhe() -> dict | None:
-    """从聚合数据API获取美元对人民币的实时汇率。.
+    """从聚合数据API获取美元对人民币的实时汇率.
     
     Returns:
         dict | None: 包含汇率信息的字典，如果获取失败则返回None
@@ -86,7 +86,7 @@ def get_exchange_rate_from_juhe() -> dict | None:
 
 
 def get_exchange_rate_from_mxnzp() -> dict | None:
-    """从美心智能平台获取美元对人民币的实时汇率（备用方法）。.
+    """从美心智能平台获取美元对人民币的实时汇率（备用方法）.
     
     Returns:
         dict | None: 包含汇率信息的字典，如果获取失败则返回None
@@ -128,7 +128,7 @@ def get_exchange_rate_from_mxnzp() -> dict | None:
 
 
 def get_exchange_rate() -> dict | None:
-    """获取美元对人民币的实时汇率，优先使用聚合数据API，如果失败则使用美心智能平台API。.
+    """获取美元对人民币的实时汇率，优先使用聚合数据API，如果失败则使用美心智能平台API.
     
     Returns:
         dict | None: 包含汇率信息的字典，如果获取失败则返回None

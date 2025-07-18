@@ -34,7 +34,7 @@ def get_gold_price_from_cngold() -> dict | None:
 
 def get_gold_price_from_cngold_webpage() -> dict | None:
     """
-    从金投网网页获取黄金价格（备用方法）。
+    从金投网网页获取黄金价格（备用方法）.
     
     通过解析金投网HTML页面获取最新的黄金价格数据。
     

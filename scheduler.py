@@ -1,4 +1,4 @@
-"""任务调度模块。
+"""任务调度模块.
 
 该模块提供了任务调度功能，包括判断A股交易时间和管理不同数据的获取时间间隔。
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def is_market_open() -> bool:
-    """检查当前是否为A股交易时间（包括节假日判断）。.
+    """检查当前是否为A股交易时间（包括节假日判断）.
     
     Returns:
         bool: 如果当前是交易时间则返回True，否则返回False。
@@ -59,13 +59,13 @@ def is_market_open() -> bool:
 
 
 class Scheduler:
-    """负责调度任务的类。.
+    """负责调度任务的类.
     
     负责管理不同数据（黄金、股指、汇率）的获取时间间隔和最后获取时间。
     """
 
     def __init__(self, intervals: dict[str, int]) -> None:
-        """初始化调度器。.
+        """初始化调度器.
         
         Args:
             intervals: 包含各类资产监控间隔的字典，键为资产名称，值为间隔秒数。
@@ -74,7 +74,7 @@ class Scheduler:
         self.last_fetch_times = {"gold": 0, "indices": 0, "exchange_rate": 0}
 
     def should_fetch(self, asset_name: str) -> bool:
-        """根据资产名称和时间间隔判断是否应该获取数据。.
+        """根据资产名称和时间间隔判断是否应该获取数据.
         
         Args:
             asset_name: 资产名称，可以是'gold'、'indices'或'exchange_rate'。
@@ -103,7 +103,7 @@ class Scheduler:
         return False
 
     def update_fetch_time(self, asset_name: str) -> None:
-        """更新资产的最后获取时间。.
+        """更新资产的最后获取时间.
         
         Args:
             asset_name: 资产名称，可以是'gold'、'indices'或'exchange_rate'。
