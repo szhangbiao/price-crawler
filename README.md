@@ -46,18 +46,39 @@
 ├── .python-version    # Python版本信息
 ├── .venv/             # 虚拟环境目录
 ├── .env               # 环境变量配置文件（API密钥等）
+├── .env.example       # 环境变量示例文件
+├── .gitignore         # Git忽略文件配置
+├── .pre-commit-config.yaml # pre-commit钩子配置
+├── .pylintrc          # pylint配置文件
 ├── data/              # 数据存储目录
 │   ├── gold_price_data.csv    # 黄金价格数据
 │   ├── stock_indices_data.csv # 多个股指数据
 │   └── exchange_rate_data.csv # 中美汇率数据
+├── exchange_rate/     # 汇率数据获取模块
+│   ├── __init__.py    # 模块初始化文件
+│   └── exchange_rate_api.py # 汇率API调用实现
+├── gold/              # 黄金价格数据获取模块
+│   ├── __init__.py    # 模块初始化文件
+│   ├── cngold_crawler.py # 金投网爬虫
+│   ├── gold_crawler.py # 黄金价格爬虫统一接口
+│   ├── goldprice_crawler.py # GoldPrice.org爬虫
+│   └── juhe_api.py    # 聚合数据API调用
+├── stock/             # 股票数据获取模块
+│   ├── __init__.py    # 模块初始化文件
+│   └── stock_indices.py # 股指数据获取实现
+├── storage/           # 数据存储模块
+│   ├── __init__.py    # 模块初始化文件
+│   ├── base.py        # 存储基类定义
+│   └── csv_storage.py # CSV存储实现
 ├── README.md          # 项目说明文档
 ├── main.py            # 主程序代码
-├── gold_price.py      # 黄金价格数据获取模块
-├── stock_indices.py   # A股指数数据获取模块
-├── exchange_rate.py   # 中美汇率数据获取模块
+├── utils/             # 工具模块
+│   ├── __init__.py    # 模块初始化文件
+│   └── scheduler.py   # 调度器模块
 ├── price_crawler.log  # 程序运行日志
 ├── pyproject.toml     # 项目配置和依赖信息
-└── uv.lock            # 依赖锁定文件
+├── uv.toml            # uv工具配置
+└── uv_usage.md        # uv使用说明
 ```
 
 ## 安装与设置
@@ -79,27 +100,22 @@ uv sync
 
 3. 配置 API 密钥
 
-在项目根目录下创建或编辑`.env`文件，添加以下配置：
+在项目根目录下创建或编辑`.env`文件，添加以下配置（可参考 `.env.example` 文件）：
 
 ```
-# 美心智能平台秘钥（用于汇率数据）
-MXNZP_APP_ID=your_mxnzp_app_id
-MXNZP_APP_SECRET=your_mxnzp_app_secret
+# 聚合数据黄金价格API密钥
+JUHE_GOLD_APPKEY=your_juhe_gold_appkey_here
 
-# 极速数据API密钥（用于黄金价格数据）
-JISUAPI_APPKEY=your_jisuapi_appkey
-
-# 聚合数据API密钥（黄金价格数据备用API）
-JUHE_APPKEY=your_juhe_appkey
+# 聚合数据汇率换算API密钥
+JUHE_EXCHANGE_RATE_APPKEY=your_juhe_exchange_rate_appkey_here
 ```
 
 ### 获取 API 密钥
 
--   **MXNZP 平台**：访问 [https://www.mxnzp.com](https://www.mxnzp.com) 注册并获取 APP_ID 和 APP_SECRET
--   **极速数据**：访问 [https://www.jisuapi.com/api/gold/](https://www.jisuapi.com/api/gold/) 注册并获取 APPKEY
--   **聚合数据**：访问 [http://web.juhe.cn:8080/finance/gold/shgold](http://web.juhe.cn:8080/finance/gold/shgold) 注册并获取 APPKEY
+-   **聚合数据黄金价格 API**：访问 [http://web.juhe.cn:8080/finance/gold/shgold](http://web.juhe.cn:8080/finance/gold/shgold) 注册并获取 APPKEY
+-   **聚合数据汇率换算 API**：访问 [https://www.juhe.cn/docs/api/id/80](https://www.juhe.cn/docs/api/id/80) 注册并获取 APPKEY
 
-> 注意：如果未配置 API 密钥或 API 调用失败，程序将使用备用的模拟数据
+> 注意：如果未配置 API 密钥或 API 调用失败，程序将按照金投网爬虫 → GoldPrice.org 爬虫 → 聚合数据 API → 模拟数据的顺序尝试获取数据
 
 ## 使用方法
 
@@ -139,7 +155,7 @@ uv run main.py
 -   数据存储路径：修改 `main.py` 中的 `DATA_DIR` 常量
 -   日志级别：修改 `logging.basicConfig()` 中的 `level` 参数
 -   API 密钥：修改 `.env` 文件中的相应配置项
--   黄金价格数据源：默认会按照极速数据 API → 聚合数据 API → 模拟数据的顺序尝试获取数据，您可以在 `gold_price.py` 中修改这个顺序
+-   黄金价格数据源：默认会按照金投网爬虫 → GoldPrice.org 爬虫 → 聚合数据 API → 模拟数据的顺序尝试获取数据，您可以在 `gold/gold_crawler.py` 中修改这个顺序
 
 ## 代码最佳实践
 
@@ -155,6 +171,41 @@ uv run main.py
 5. **数据持久化**：定期保存数据，并在程序异常退出时尝试保存已收集的数据
 6. **代码文档**：为函数和模块添加详细的文档字符串
 7. **单一职责原则**：每个模块和函数只负责一个特定的功能
+8. **代码质量工具**：
+    - 使用 ruff 进行代码检查和格式化
+    - 使用 pylint 进行更严格的代码质量检查
+    - 使用 pre-commit 钩子在提交前自动运行代码检查
+
+### 代码质量检查
+
+本项目使用以下工具确保代码质量：
+
+1. **Ruff**：快速的 Python linter 和 formatter
+
+    ```bash
+    # 运行代码检查
+    ruff check .
+
+    # 运行代码格式化
+    ruff format .
+    ```
+
+2. **Pylint**：更全面的 Python 代码分析工具
+
+    ```bash
+    # 运行pylint检查
+    pylint main.py gold stock exchange_rate storage
+    ```
+
+3. **Pre-commit**：Git 提交前自动运行检查
+
+    ```bash
+    # 安装pre-commit钩子
+    pre-commit install
+
+    # 手动运行所有pre-commit钩子
+    pre-commit run --all-files
+    ```
 
 ## uv 工具的优势
 

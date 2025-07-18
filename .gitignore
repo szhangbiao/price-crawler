@@ -1,18 +1,55 @@
-# .env file
+# 环境变量和敏感信息
 .env
+.env.*
+!.env.example
 
-# virtual environment
+# 虚拟环境
 .venv/
+venv/
+env/
 
-# Pycache
+# Python缓存文件
 __pycache__/
-gold/__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
 
-# Log files
+# 日志文件
 *.log
+logs/
 
-# data files
+# 数据文件
 /data/
+*.csv
+*.xlsx
+*.db
+*.sqlite3
 
+# 依赖管理
 uv.lock
+pip-log.txt
+pip-delete-this-directory.txt
+
+# IDE和编辑器
 .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 构建和缓存
+build/
+dist/
+*.egg-info/
+.eggs/
+.ruff_cache/
+.mypy_cache/
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 项目特定忽略
+# 添加项目特定的忽略规则

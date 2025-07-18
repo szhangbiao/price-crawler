@@ -18,7 +18,7 @@ import pandas as pd
 from storage import CsvStorage, Storage
 from exchange_rate import get_exchange_rate
 from gold import get_gold_price
-from scheduler import Scheduler
+from utils.scheduler import Scheduler
 from stock import get_all_indices
 
 # 配置日志记录
@@ -140,9 +140,7 @@ def monitor_prices(intervals: dict[str, int]) -> None:
         intervals: 包含各类资产监控间隔的字典, e.g. {'gold': 1800, 'indices': 60, 'exchange_rate': 1800}.
     """
     logger.info("开始监控黄金价格、中美汇率和A股大盘指数...")
-    logger.info(
-        f"监控间隔: 黄金 {intervals.get('gold', 'N/A')}s, 股指 {intervals.get('indices', 'N/A')}s, 汇率 {intervals.get('exchange_rate', 'N/A')}s"
-    )
+    logger.info("监控间隔: 黄金 %s s, 股指 %s s, 汇率 %s s", intervals.get('gold', 'N/A'), intervals.get('indices', 'N/A'), intervals.get('exchange_rate', 'N/A'))
     print("-" * 50)
 
     # 初始化数据存储

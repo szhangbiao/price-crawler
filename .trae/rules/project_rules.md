@@ -54,9 +54,15 @@
     ├── .venv/             # 虚拟环境目录
     ├── .env               # 环境变量配置文件（API密钥等）
     ├── data/              # 数据存储目录
+    ├── logs/              # 日志文件目录
+    ├── tests/             # 测试代码目录
+    ├── gold/              # 黄金价格数据获取模块
+    ├── stock/             # 股票指数数据获取模块
+    ├── exchange_rate/     # 汇率数据获取模块
+    ├── storage/           # 数据存储模块
+    ├── utils/             # 工具模块
     ├── README.md          # 项目说明文档
     ├── main.py            # 主程序代码
-    ├── [module_name].py   # 功能模块
     ├── pyproject.toml     # 项目配置和依赖信息
     └── uv.lock            # 依赖锁定文件
     ```
@@ -66,6 +72,20 @@
 -   每个功能模块应该是独立的，有明确的职责
 -   相关功能应组织在同一个模块或包中
 -   避免循环导入
+-   模块目录必须包含 `__init__.py` 文件
+-   模块化设计：
+    -   `gold/`：负责从多个来源获取黄金价格数据
+        -   `gold_crawler.py`：统一接口，整合多个数据源
+        -   `cngold_crawler.py`：金投网爬虫
+        -   `goldprice_crawler.py`：GoldPrice.org爬虫
+        -   `juhe_api.py`：聚合数据API调用
+    -   `stock/`：负责获取股票指数数据
+    -   `exchange_rate/`：负责获取汇率数据
+    -   `storage/`：负责数据存储
+        -   `base.py`：存储基类定义
+        -   `csv_storage.py`：CSV存储实现
+    -   `utils/`：工具模块
+        -   `scheduler.py`：任务调度模块，提供交易时间判断和数据获取调度功能
 
 ## 3. 编程实践
 
@@ -131,9 +151,22 @@
 
 ### 6.2 代码质量工具
 
--   使用 ruff 进行代码风格检查
--   使用 pylint 进行静态代码分析
--   使用 black 进行代码格式化
+-   使用 ruff 进行代码检查和格式化
+    - 运行 `ruff check .` 检查代码问题
+    - 运行 `ruff format .` 格式化代码
+    - 配置在 `pyproject.toml` 中的 `[tool.ruff]` 部分
+-   使用 pylint 进行更严格的代码质量检查
+    - 运行 `pylint <module_name>` 检查特定模块
+    - 配置在 `.pylintrc` 文件中
+-   使用 `pre-commit` 在提交代码前自动运行检查
+    - 配置在 `.pre-commit-config.yaml` 文件中
+    - 安装钩子：`pre-commit install`
+    - 手动运行：`pre-commit run --all-files`
+-   代码质量标准：
+    - 遵循 PEP 8 编码规范
+    - 保持函数和方法的复杂度低（McCabe复杂度<10）
+    - 避免重复代码（DRY原则）
+    - 保持高测试覆盖率
 
 ## 7. 版本控制
 
