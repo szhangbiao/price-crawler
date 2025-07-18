@@ -176,8 +176,17 @@
 -   指定依赖的版本范围，避免使用过于宽松的版本约束
 -   使用 uv 工具管理依赖和虚拟环境
 
-### 4.2 虚拟环境
+### 4.2 使用 uv 管理依赖
 
+-   使用 uv 替代 pip 进行包管理，提供更快的安装速度和更好的依赖解析
+-   安装依赖：`uv pip install -r requirements.txt` 或 `uv pip install -e .`
+-   添加新依赖：`uv pip install <package_name>`
+-   更新依赖锁定文件：`uv pip compile pyproject.toml -o uv.lock`
+-   使用 `uv.toml` 配置 uv 行为
+
+### 4.3 虚拟环境
+
+-   使用 uv 创建和管理虚拟环境：`uv venv`
 -   始终在虚拟环境中开发和运行项目
 -   不要将虚拟环境目录（.venv/）提交到版本控制系统
 

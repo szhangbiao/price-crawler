@@ -19,12 +19,11 @@ from exchange_rate import get_exchange_rate
 from gold import get_gold_price
 from stock import get_all_indices
 from storage import CsvStorage, Storage
-from utils.logger import configure_basic_logging, get_logger
+from utils.logger import get_logger
 from utils.scheduler import Scheduler
 
 # 配置日志记录
-configure_basic_logging("price_crawler.log", level=logging.INFO)
-logger = get_logger(__name__, "price_crawler.log")
+logger = get_logger(__name__, "price_crawler.log", level=logging.INFO)
 
 
 def fetch_gold_price(scheduler: Scheduler, gold_data: pd.DataFrame) -> bool:
@@ -40,7 +39,7 @@ def fetch_gold_price(scheduler: Scheduler, gold_data: pd.DataFrame) -> bool:
     if not scheduler.should_fetch("gold"):
         return False
 
-    gold_info = get_gold_price()
+    gold_info = get_gold_price("Au9999")
     scheduler.update_fetch_time("gold")
     if gold_info:
         print(
@@ -179,7 +178,7 @@ def monitor_prices(intervals: dict[str, int]) -> None:
                 save_data(storage, gold_data, indices_data, exchange_rate_data)
 
             # 短暂休眠以避免CPU占用过高
-            time.sleep(1)
+            time.sleep(10)
 
     except KeyboardInterrupt:
         logger.info("\n监控已停止")
