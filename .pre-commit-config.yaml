@@ -1,0 +1,8 @@
+- repo: https://github.com/astral-sh/ruff-pre-commit
+  rev: v0.12.4 # 使用最新版本
+  hooks:
+      # 运行 linter
+      - id: ruff-check
+        args: [--fix]
+      # 运行 formatter
+      - id: ruff-format

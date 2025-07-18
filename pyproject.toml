@@ -15,3 +15,58 @@ dependencies = [
     "numpy>=1.20.0",
     "pytz>=2021.1",
 ]
+
+#开发环境依赖
+[dependency-groups]
+dev = [
+    "ruff>=0.12.4",
+]
+
+# Ruff代码检查工具 设置
+[tool.ruff]
+line-length = 200
+
+# 设置 Python 版本
+target-version = "py312"
+
+# 排除目录
+exclude = [
+    ".git",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+]
+
+# Lint 配置
+[tool.ruff.lint]
+# 启用规则集
+select = [
+    "E",   # pycodestyle 错误
+    "F",   # Pyflakes
+    "B",   # flake8-bugbear
+    "I",   # isort
+    "UP",  # pyupgrade
+    "N",   # pep8-naming
+    "ANN", # flake8-annotations
+    "D",   # pydocstyle
+]
+
+# 忽略特定规则
+ignore = [
+    "D203",    # one-blank-line-before-class
+    "D212",    # multi-line-summary-first-line
+]
+
+# 在特定文件中忽略规则
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401", "D104"]
+"test_*.py" = ["ANN", "D"]
+
+# pydocstyle 配置
+[tool.ruff.lint.pydocstyle]
+convention = "google"  # 使用 Google 风格的文档字符串
+
+# isort 配置
+[tool.ruff.lint.isort]
+known-first-party = ["stock", "gold_price", "exchange_rate", "data_storage", "scheduler"]

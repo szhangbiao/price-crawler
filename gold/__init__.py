@@ -1,8 +1,7 @@
 #!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 """
-黄金价格爬虫包
+黄金价格爬虫包.
 
 这个包提供了从多个来源获取黄金价格的功能。
 包括金投网(cngold.org)和GoldPrice.org网站。
