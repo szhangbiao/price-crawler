@@ -8,17 +8,59 @@
 -   使用 4 个空格进行缩进，不使用制表符
 -   行长度不超过 100 个字符
 -   函数和类之间空两行，类中的方法之间空一行
--   导入顺序：标准库 > 第三方库 > 本地模块，每组之间空一行
 -   使用有意义的变量名和函数名，采用小写字母和下划线命名法（snake_case）
+-   所有公共函数和方法必须包含参数和返回值的类型注解
+-   使用Python内置的typing模块进行类型注解
+-   复杂类型使用类型别名（TypeAlias）提高可读性
+-   示例：
+    ```python
+    from typing import List, Dict, Optional, Union
+    
+    def process_data(data: List[Dict[str, Union[str, int]]], filter_empty: bool = False) -> Optional[Dict[str, int]]:
+        """处理数据函数
+        
+        Args:
+            data: 要处理的数据列表
+            filter_empty: 是否过滤空值
+            
+        Returns:
+            处理后的数据字典，如果处理失败则返回None
+        """
+    ```
+-   导入顺序必须严格遵循：
+    1. 标准库导入
+    2. 空行
+    3. 第三方库导入
+    4. 空行
+    5. 本地模块导入
+-   每个分组内部按字母顺序排序
+-   同一分组内，先导入模块，再导入from语句
+-   本地模块导入时，相对导入（以.开头）应放在绝对导入之前
+-   示例：
+    ```python
+    # 标准库导入
+    import os
+    import sys
+    from datetime import datetime
+    
+    # 第三方库导入
+    import pandas as pd
+    import requests
+    from bs4 import BeautifulSoup
+    
+    # 本地模块导入
+    from .utils import helper
+    from config import settings
+    ```
 
 ### 1.2 文件格式
 
 -   所有 Python 文件使用 UTF-8 编码
--   文件开头添加 shebang 行和编码声明：
+-   文件开头添加 shebang 行（对于可执行脚本）：
     ```python
     #!/usr/bin/env python
-    # -*- coding: utf-8 -*-
     ```
+-   不再需要添加编码声明（# -*- coding: utf-8 -*-），Python 3默认使用UTF-8
 -   每个文件末尾保留一个空行
 
 ### 1.3 注释规范
@@ -26,21 +68,24 @@
 -   每个模块、类和函数都应有文档字符串（docstring）
 -   模块级文档字符串应描述模块的功能和用途
 -   函数文档字符串应包含参数、返回值和异常说明
+-   文档字符串必须以句点结尾
+-   模块级文档字符串应简洁描述模块功能，以句点结尾
+-   函数文档字符串中的Args、Returns、Raises等部分不需要句点结尾，但描述文本需要句点结尾
 -   使用 Google 风格的文档字符串格式：
 
     ```python
     def function(param1, param2):
-        """函数描述
+        """函数描述。
 
         Args:
-            param1: 参数1的描述
-            param2: 参数2的描述
+            param1: 参数1的描述。
+            param2: 参数2的描述。
 
         Returns:
-            返回值的描述
+            返回值的描述。
 
         Raises:
-            异常类型: 异常描述
+            异常类型: 异常描述。
         """
     ```
 
@@ -94,6 +139,15 @@
 -   使用 try-except 块捕获和处理异常
 -   避免捕获过于宽泛的异常（如 `except Exception:`），除非有明确的错误恢复策略
 -   使用日志记录异常，而不是简单地打印错误信息
+-   优先使用更通用的异常类型，如OSError而不是IOError、FileNotFoundError或PermissionError
+-   异常处理示例：
+    ```python
+    try:
+        with open(file_path, 'r') as f:
+            data = f.read()
+    except OSError as e:
+        logger.error("读取文件出错: %s", e)
+    ```
 
 ### 3.2 日志记录
 
@@ -153,6 +207,7 @@
 
 -   使用 ruff 进行代码检查和格式化
     - 运行 `ruff check .` 检查代码问题
+    - 运行 `ruff check . --fix` 自动修复可自动修复的问题
     - 运行 `ruff format .` 格式化代码
     - 配置在 `pyproject.toml` 中的 `[tool.ruff]` 部分
 -   使用 pylint 进行更严格的代码质量检查
@@ -167,6 +222,39 @@
     - 保持函数和方法的复杂度低（McCabe复杂度<10）
     - 避免重复代码（DRY原则）
     - 保持高测试覆盖率
+-   在开发过程中，定期运行`ruff check .`检查代码问题
+-   对于新编写的代码，确保通过所有启用的ruff规则检查
+-   在提交代码前，确保运行`ruff format .`格式化代码
+
+### 6.3 ruff规则说明
+
+项目启用的主要ruff规则集及其含义：
+
+- E: pycodestyle错误，基本的代码风格问题
+- F: Pyflakes，检测未使用的导入、变量等
+- B: flake8-bugbear，检测潜在的bug和设计问题
+- I: isort，导入排序
+- UP: pyupgrade，使用更现代的Python语法
+- N: pep8-naming，命名规范
+- ANN: flake8-annotations，类型注解检查
+- D: pydocstyle，文档字符串规范
+
+常见问题及解决方法：
+
+1. ANN001/ANN201: 缺少函数参数/返回值类型注解
+   - 解决：为所有公共函数添加参数和返回值的类型注解
+
+2. I001: 导入未排序或格式不正确
+   - 解决：按照标准库、第三方库、本地模块的顺序组织导入，并在各组之间添加空行
+
+3. UP024: 使用OSError替代IOError等
+   - 解决：在异常处理中使用OSError替代IOError、FileNotFoundError等
+
+4. D400: 文档字符串首字母应大写
+   - 解决：确保所有文档字符串以大写字母开头
+
+5. D415: 文档字符串应以句点结尾
+   - 解决：确保所有文档字符串以句点结尾
 
 ## 7. 版本控制
 

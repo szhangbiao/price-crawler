@@ -75,7 +75,7 @@
 ├── utils/             # 工具模块
 │   ├── __init__.py    # 模块初始化文件
 │   └── scheduler.py   # 调度器模块
-├── price_crawler.log  # 程序运行日志
+# 日志文件存储在 D:/booslink/logs/ 目录下
 ├── pyproject.toml     # 项目配置和依赖信息
 ├── uv.toml            # uv工具配置
 └── uv_usage.md        # uv使用说明
@@ -145,7 +145,7 @@ uv run main.py
 
 ## 日志记录
 
-程序运行日志会同时输出到控制台和 `price_crawler.log` 文件中，便于问题排查和监控。
+程序运行日志会同时输出到控制台和 `D:/booslink/logs/price_crawler.log` 文件中，便于问题排查和监控。所有日志文件都存储在 `D:/booslink/logs/` 目录下。
 
 ## 自定义设置
 

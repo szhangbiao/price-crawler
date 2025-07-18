@@ -9,6 +9,6 @@
 
 # 导入子模块
 from .cngold_crawler import get_gold_price_from_cngold
-from .goldprice_crawler import get_gold_price_from_goldprice
-from .juhe_api import get_gold_price_from_juhe, get_gold_price_fallback
 from .gold_crawler import get_gold_price
+from .goldprice_crawler import get_gold_price_from_goldprice
+from .juhe_api import get_gold_price_fallback, get_gold_price_from_juhe

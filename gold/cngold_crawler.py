@@ -10,12 +10,15 @@
 # 标准库导入
 import logging
 
-# 第三方库导入
 import requests
+
+# 第三方库导入
 from bs4 import BeautifulSoup
 
+from utils.logger import get_logger
+
 # 获取logger
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "cngold_crawler.log")
 
 # 常量定义
 CNGOLD_URL = "https://quote.cngold.org/gjs/jjs.html"
@@ -72,14 +75,8 @@ def get_gold_price_from_cngold_webpage() -> dict | None:
 # 测试代码
 if __name__ == "__main__":
     # 配置日志
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler("cngold_crawler.log", encoding="utf-8"),
-        ],
-    )
+    from utils.logger import configure_basic_logging
+    configure_basic_logging("cngold_crawler.log", level=logging.DEBUG)
 
     print("金投网黄金价格爬虫测试")
     print("-" * 50)
@@ -87,8 +84,8 @@ if __name__ == "__main__":
     # 测试获取黄金价格
     gold_info = get_gold_price_from_cngold()
     if gold_info:
-        # print(f"黄金价格: {gold_info['price']} 元/克")
-        # print(f"涨跌: {gold_info['change']} | 涨跌幅: {gold_info['change_percent']}%")
+        print(f"黄金价格: {gold_info.get('price','未知')} 元/克")
+        print(f"涨跌: {gold_info.get('change','未知')} | 涨跌幅: {gold_info.get('change_percent','未知')}%")
         print(f"更新时间: {gold_info.get('update_time', '未知')}")
         print(f"数据来源: {gold_info.get('source', '未知')}")
     else:

@@ -10,13 +10,15 @@
 # 标准库导入
 import logging
 
+from utils.logger import get_logger
+
 # 导入爬虫模块
 from .cngold_crawler import get_gold_price_from_cngold
 from .goldprice_crawler import get_gold_price_from_goldprice
-from .juhe_api import get_gold_price_from_juhe, get_gold_price_fallback
+from .juhe_api import get_gold_price_fallback, get_gold_price_from_juhe
 
 # 获取logger
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "gold_crawler.log")
 
 
 def get_gold_price() -> dict | None:
@@ -66,14 +68,8 @@ def get_gold_price() -> dict | None:
 # 测试代码
 if __name__ == "__main__":
     # 配置日志
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler("gold_crawler.log", encoding="utf-8"),
-        ],
-    )
+    from utils.logger import configure_basic_logging
+    configure_basic_logging("gold_crawler.log", level=logging.DEBUG)
 
     print("黄金价格爬虫测试")
     print("-" * 50)

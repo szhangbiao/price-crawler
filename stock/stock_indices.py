@@ -14,8 +14,10 @@ from datetime import datetime
 # 第三方库导入
 import requests
 
+from utils.logger import get_logger
+
 # 获取logger
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "stock_indices.log")
 
 # 常量定义
 INDEX_CODES = {
@@ -103,9 +105,8 @@ def get_all_indices() -> list[dict]:
 # 测试代码
 if __name__ == "__main__":
     # 配置日志
-    logging.basicConfig(
-        level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    from utils.logger import configure_basic_logging
+    configure_basic_logging("stock_indices.log", level=logging.INFO)
 
     # 测试获取上证指数
     sh_index = get_stock_index("sh")

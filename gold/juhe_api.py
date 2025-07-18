@@ -13,14 +13,17 @@ import os
 import random
 from datetime import datetime
 
+# 第三方库导入
 import requests
 from dotenv import load_dotenv
+
+from utils.logger import get_logger
 
 # 加载环境变量
 load_dotenv()
 
 # 获取logger
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "gold_juhe_price.log")
 
 # API配置
 JUHE_APPKEY = os.getenv("JUHE_GOLD_APPKEY")
@@ -123,11 +126,8 @@ def get_gold_price_fallback() -> dict | None:
 # 测试代码
 if __name__ == "__main__":
     # 配置日志
-    logging.basicConfig(
-        level=logging.DEBUG,  # 使用DEBUG级别以显示更多日志信息
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[logging.StreamHandler(), logging.FileHandler("gold_price.log", encoding="utf-8")],
-    )
+    from utils.logger import configure_basic_logging
+    configure_basic_logging("gold_price.log", level=logging.DEBUG)
 
     print("聚合数据API黄金价格获取测试")
     print("-" * 50)

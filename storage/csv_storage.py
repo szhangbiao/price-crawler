@@ -84,7 +84,7 @@ class CsvStorage(Storage):
                 return data
             except pd.errors.ParserError as e:
                 logger.error("解析%s数据出错: %s", data_name, e)
-            except (IOError, FileNotFoundError) as e:
+            except OSError as e:
                 logger.error("读取%s文件出错: %s", data_name, e)
             except Exception as e:  # pylint: disable=broad-except
                 # 捕获其他未预见的异常，确保程序不会崩溃
@@ -109,7 +109,7 @@ class CsvStorage(Storage):
             indices_data.to_csv(self.indices_data_file, index=False)
             exchange_rate_data.to_csv(self.exchange_rate_data_file, index=False)
             logger.debug("数据已保存到CSV文件")
-        except (IOError, PermissionError) as e:
+        except OSError as e:
             logger.error("保存数据时文件操作错误: %s", e)
         except Exception as e:  # pylint: disable=broad-except
             # 捕获其他未预见的异常，确保程序不会崩溃

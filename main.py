@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-、中美汇率和A股大盘指数监控程序.
+中美汇率和A股大盘指数监控程序.
 
 该程序用于监控黄金价格、中美汇率和A股大盘指数的变动，并将数据保存到CSV文件中。
 """
@@ -15,19 +15,16 @@ from datetime import datetime
 import pandas as pd
 
 # 本地模块导入
-from storage import CsvStorage, Storage
 from exchange_rate import get_exchange_rate
 from gold import get_gold_price
-from utils.scheduler import Scheduler
 from stock import get_all_indices
+from storage import CsvStorage, Storage
+from utils.logger import configure_basic_logging, get_logger
+from utils.scheduler import Scheduler
 
 # 配置日志记录
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[logging.StreamHandler(), logging.FileHandler("price_crawler.log", encoding="utf-8")],
-)
-logger = logging.getLogger(__name__)
+configure_basic_logging("price_crawler.log", level=logging.INFO)
+logger = get_logger(__name__, "price_crawler.log")
 
 
 def fetch_gold_price(scheduler: Scheduler, gold_data: pd.DataFrame) -> bool:
@@ -126,7 +123,7 @@ def save_data(storage: 'Storage', gold_data: 'pd.DataFrame', indices_data: 'pd.D
     try:
         storage.save(gold_data, indices_data, exchange_rate_data)
         logger.debug("数据已成功保存")
-    except (IOError, PermissionError) as e:
+    except OSError as e:
         logger.error("保存数据时文件操作错误: %s", e)
     except Exception as e:  # pylint: disable=broad-except
         # 捕获所有异常以确保监控循环不会因数据保存失败而中断

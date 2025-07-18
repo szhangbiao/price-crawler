@@ -14,8 +14,10 @@ from datetime import datetime
 # 第三方库导入
 import requests
 
+from utils.logger import get_logger
+
 # 获取logger
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__, "goldprice_crawler.log")
 
 # API URL
 GOLDPRICE_API_URL = "https://goldpricez.com/cn/gram"
@@ -101,14 +103,8 @@ def get_gold_price_from_goldprice() -> dict | None:
 # 测试代码
 if __name__ == "__main__":
     # 配置日志
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler("goldprice_crawler.log", encoding="utf-8"),
-        ],
-    )
+    from utils.logger import configure_basic_logging
+    configure_basic_logging("goldprice_crawler.log", level=logging.DEBUG)
 
     print("GoldPrice.org黄金价格爬虫测试")
     print("-" * 50)

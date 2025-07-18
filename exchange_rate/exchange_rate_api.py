@@ -14,10 +14,12 @@ from datetime import datetime
 import requests
 from dotenv import load_dotenv
 
+from utils.logger import get_logger
+
 load_dotenv()
 
-# 配置日志记录
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
+# 获取logger
+logger = get_logger(__name__, "exchange_rate.log")
 
 # https://www.mxnzp.com 平台秘钥 (备用API)
 APP_ID = os.getenv("MXNZP_APP_ID")
@@ -37,7 +39,7 @@ def get_exchange_rate_from_juhe() -> dict | None:
     """
     try:
         if not JUHE_APPKEY:
-            logging.warning("聚合数据API密钥未配置，无法获取汇率数据")
+            logger.warning("聚合数据API密钥未配置，无法获取汇率数据")
             return None
 
         url = JUHE_URL.format(JUHE_APPKEY)
@@ -66,21 +68,21 @@ def get_exchange_rate_from_juhe() -> dict | None:
                     "update": usd_cny_data.get("updateTime", current_time),
                     "source": "聚合数据",
                 }
-                logging.info("成功从聚合数据获取汇率数据：%s = %s", rate_data['name'], rate_data['price'])
+                logger.info("成功从聚合数据获取汇率数据：%s = %s", rate_data['name'], rate_data['price'])
                 return rate_data
             else:
-                logging.error("在聚合数据API返回中未找到USD/CNY汇率数据")
+                logger.error("在聚合数据API返回中未找到USD/CNY汇率数据")
                 return None
         else:
-            logging.error("聚合数据API返回错误: %s", data.get('reason'))
+            logger.error("聚合数据API返回错误: %s", data.get('reason'))
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error("请求聚合数据API时发生网络错误: %s", e)
+        logger.error("请求聚合数据API时发生网络错误: %s", e)
         return None
     except Exception as e:  # pylint: disable=broad-except
         # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
-        logging.error("从聚合数据获取汇率数据时发生未知错误: %s", e)
+        logger.error("从聚合数据获取汇率数据时发生未知错误: %s", e)
         return None
 
 
@@ -92,7 +94,7 @@ def get_exchange_rate_from_mxnzp() -> dict | None:
     """
     try:
         if not APP_ID or not APP_SECRET:
-            logging.warning("美心智能平台API密钥未配置，无法获取汇率数据")
+            logger.warning("美心智能平台API密钥未配置，无法获取汇率数据")
             return None
 
         url = MXZNP_URL.format(APP_ID, APP_SECRET)
@@ -110,21 +112,21 @@ def get_exchange_rate_from_mxnzp() -> dict | None:
                 "update": item["updateTime"],
                 "source": "美心智能平台",
             }
-            logging.info("成功从美心智能平台获取汇率数据：%s = %s", rate_data['name'], rate_data['price'])
+            logger.info("成功从美心智能平台获取汇率数据：%s = %s", rate_data['name'], rate_data['price'])
             return rate_data
         else:
-            logging.error("美心智能平台API返回错误: %s", data.get('msg'))
+            logger.error("美心智能平台API返回错误: %s", data.get('msg'))
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error("请求美心智能平台API时发生网络错误: %s", e)
+        logger.error("请求美心智能平台API时发生网络错误: %s", e)
         return None
     except (ValueError, TypeError, KeyError) as e:
-        logging.error("处理美心智能平台数据时出错: %s", e)
+        logger.error("处理美心智能平台数据时出错: %s", e)
         return None
     except Exception as e:  # pylint: disable=broad-except
         # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
-        logging.error("从美心智能平台获取汇率数据时发生未知错误: %s", e)
+        logger.error("从美心智能平台获取汇率数据时发生未知错误: %s", e)
         return None
 
 
@@ -140,18 +142,18 @@ def get_exchange_rate() -> dict | None:
         return rate_data
 
     # 如果聚合数据获取失败，尝试从美心智能平台获取
-    logging.info("从聚合数据获取汇率失败，尝试从美心智能平台获取")
+    logger.info("从聚合数据获取汇率失败，尝试从美心智能平台获取")
     rate_data = get_exchange_rate_from_mxnzp()
     if rate_data:
         return rate_data
 
-    logging.error("所有API获取汇率数据均失败")
+    logger.error("所有API获取汇率数据均失败")
     return None
 
 
 if __name__ == "__main__":
     # 设置日志级别为DEBUG以查看更多信息
-    logging.getLogger().setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
 
     # 测试 get_exchange_rate 函数
     rate = get_exchange_rate()
