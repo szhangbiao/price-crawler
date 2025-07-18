@@ -32,7 +32,7 @@ def get_gold_price_from_goldprice() -> dict | None:
         dict | None: 包含价格、涨跌额、涨跌幅和时间的字典，如果出错则返回None。
     """
     try:
-        logger.debug(f"请求GoldPrice API: {GOLDPRICE_API_URL}")
+        logger.debug("请求GoldPrice API: %s", GOLDPRICE_API_URL)
 
         # 设置请求头，模拟浏览器访问
         headers = {
@@ -60,13 +60,13 @@ def get_gold_price_from_goldprice() -> dict | None:
                 rate_data = get_exchange_rate()
                 if rate_data and "price" in rate_data:
                     usd_to_cny_rate = float(rate_data["price"])
-                    logger.info(f"获取到实时汇率: {usd_to_cny_rate}")
+                    logger.info("获取到实时汇率: %s", usd_to_cny_rate)
                 else:
                     usd_to_cny_rate = USD_TO_CNY_RATE
-                    logger.warning(f"无法获取实时汇率，使用备用汇率: {USD_TO_CNY_RATE}")
+                    logger.warning("无法获取实时汇率，使用备用汇率: %s", USD_TO_CNY_RATE)
             except ImportError:
                 usd_to_cny_rate = USD_TO_CNY_RATE
-                logger.warning(f"无法导入exchange_rate模块，使用备用汇率: {USD_TO_CNY_RATE}")
+                logger.warning("无法导入exchange_rate模块，使用备用汇率: %s", USD_TO_CNY_RATE)
 
             # 将美元价格转换为人民币价格
             gold_price_cny_g = gold_price_usd_g * usd_to_cny_rate
@@ -87,10 +87,14 @@ def get_gold_price_from_goldprice() -> dict | None:
             return None
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"请求GoldPrice API时发生网络错误: {e}")
+        logger.error("请求GoldPrice API时发生网络错误: %s", e)
         return None
-    except Exception as e:
-        logger.error(f"从GoldPrice获取黄金价格时出错: {e}")
+    except (ValueError, TypeError, KeyError) as e:
+        logger.error("解析GoldPrice数据时出错: %s", e)
+        return None
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
+        logger.error("从GoldPrice获取黄金价格时出错: %s", e)
         return None
 
 

@@ -49,7 +49,7 @@ def get_gold_price_from_juhe() -> dict | None:
 
     try:
         url = JUHE_URL.format(JUHE_APPKEY)
-        logger.debug(f"请求聚合数据API: {url}")
+        logger.debug("请求聚合数据API: %s", url)
 
         response = requests.get(url, timeout=10)
         response.raise_for_status()
@@ -80,14 +80,15 @@ def get_gold_price_from_juhe() -> dict | None:
             else:
                 logger.warning("未找到Au99.99黄金价格数据")
         else:
-            logger.warning(f"聚合数据API返回错误: {data.get('reason')}")
+            logger.warning("聚合数据API返回错误: %s", data.get('reason'))
 
         return None
     except requests.exceptions.RequestException as e:
-        logger.error(f"请求聚合数据API时发生网络错误: {e}")
+        logger.error("请求聚合数据API时发生网络错误: %s", e)
         return None
-    except Exception as e:
-        logger.error(f"从聚合数据获取黄金价格时出错: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
+        logger.error("从聚合数据获取黄金价格时出错: %s", e)
         return None
 
 
@@ -118,8 +119,8 @@ def get_gold_price_fallback() -> dict | None:
             "is_fallback": True,
             "source": "模拟数据",
         }
-    except Exception as e:
-        logger.error(f"生成模拟黄金价格数据时出错: {e}")
+    except (ValueError, TypeError) as e:
+        logger.error("生成模拟黄金价格数据时出错: %s", e)
         return None
 
 
@@ -138,7 +139,7 @@ def get_gold_price() -> dict | None:
         logger.debug("尝试从爬虫获取黄金价格")
         gold_info = get_gold_price_from_crawler()
         if gold_info:
-            logger.info(f"成功从爬虫获取黄金价格，数据来源: {gold_info.get('source', '未知')}")
+            logger.info("成功从爬虫获取黄金价格，数据来源: %s", gold_info.get('source', '未知'))
             return gold_info
 
         # 如果失败，尝试从聚合数据API获取
@@ -151,8 +152,9 @@ def get_gold_price() -> dict | None:
         # 如果两者都失败，使用备用的模拟数据方法
         logger.warning("无法从API获取黄金价格，使用备用方法")
         return get_gold_price_fallback()
-    except Exception as e:
-        logger.error(f"获取黄金价格时出错: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有异常并回退到模拟数据，确保程序能继续运行
+        logger.error("获取黄金价格时出错: %s", e)
         return get_gold_price_fallback()
 
 

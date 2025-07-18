@@ -42,7 +42,7 @@ def get_gold_price_from_cngold_webpage() -> dict | None:
         dict | None: 包含价格、涨跌额、涨跌幅和时间的字典，如果出错则返回None。
     """
     try:
-        logger.debug(f"请求金投网: {CNGOLD_URL}")
+        logger.debug("请求金投网: %s", CNGOLD_URL)
 
         # 设置请求头，模拟浏览器访问
         headers = {
@@ -61,10 +61,11 @@ def get_gold_price_from_cngold_webpage() -> dict | None:
         return None
 
     except requests.exceptions.RequestException as e:
-        logger.error(f"请求金投网时发生网络错误: {e}")
+        logger.error("请求金投网时发生网络错误: %s", e)
         return None
-    except Exception as e:
-        logger.error(f"从金投网获取黄金价格时出错: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有未预见的异常，确保爬虫失败不会导致程序崩溃
+        logger.error("从金投网获取黄金价格时出错: %s", e)
         return None
 
 

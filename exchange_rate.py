@@ -41,7 +41,7 @@ def get_exchange_rate_from_juhe() -> dict | None:
             return None
 
         url = JUHE_URL.format(JUHE_APPKEY)
-        response = requests.get(url)
+        response = requests.get(url,timeout=10)
         response.raise_for_status()  # 如果请求失败则抛出HTTPError
         data = response.json()
 
@@ -66,22 +66,21 @@ def get_exchange_rate_from_juhe() -> dict | None:
                     "update": usd_cny_data.get("updateTime", current_time),
                     "source": "聚合数据",
                 }
-                logging.info(
-                    f"成功从聚合数据获取汇率数据：{rate_data['name']} - {rate_data['price']}"
-                )
+                logging.info("成功从聚合数据获取汇率数据：%s = %s", rate_data['name'],rate_data['price'])
                 return rate_data
             else:
                 logging.error("在聚合数据API返回中未找到USD/CNY汇率数据")
                 return None
         else:
-            logging.error(f"聚合数据API返回错误: {data.get('reason')}")
+            logging.error("聚合数据API返回错误: %s",data.get('reason'))
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"请求聚合数据API时发生网络错误: {e}")
+        logging.error("请求聚合数据API时发生网络错误: %s",e)
         return None
-    except Exception as e:
-        logging.error(f"从聚合数据获取汇率数据时发生未知错误: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
+        logging.error("从聚合数据获取汇率数据时发生未知错误: %s",e)
         return None
 
 
@@ -97,7 +96,7 @@ def get_exchange_rate_from_mxnzp() -> dict | None:
             return None
 
         url = MXZNP_URL.format(APP_ID, APP_SECRET)
-        response = requests.get(url)
+        response = requests.get(url,timeout=10)
         response.raise_for_status()  # 如果请求失败则抛出HTTPError
         data = response.json()
         if data.get("code") == 1:
@@ -111,19 +110,21 @@ def get_exchange_rate_from_mxnzp() -> dict | None:
                 "update": item["updateTime"],
                 "source": "美心智能平台",
             }
-            logging.info(
-                f"成功从美心智能平台获取汇率数据：{rate_data['name']} - {rate_data['price']}"
-            )
+            logging.info("成功从美心智能平台获取汇率数据：%s",rate_data['name'] - rate_data['price'])
             return rate_data
         else:
-            logging.error(f"美心智能平台API返回错误: {data.get('msg')}")
+            logging.error("美心智能平台API返回错误: %s",data.get('msg'))
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"请求美心智能平台API时发生网络错误: {e}")
+        logging.error("请求美心智能平台API时发生网络错误: %s",e)
         return None
-    except Exception as e:
-        logging.error(f"从美心智能平台获取汇率数据时发生未知错误: {e}")
+    except (ValueError, TypeError, KeyError) as e:
+        logging.error("处理美心智能平台数据时出错: %s",e)
+        return None
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
+        logging.error("从美心智能平台获取汇率数据时发生未知错误: %s",e)
         return None
 
 

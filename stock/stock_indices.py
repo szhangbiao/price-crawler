@@ -38,7 +38,7 @@ def get_stock_index(index_type: str = "sh") -> dict | None:
         dict | None: 包含指数名称、价格、涨跌额、涨跌幅和时间的字典，如果出错则返回None
     """
     if index_type not in INDEX_CODES:
-        logger.error(f"不支持的指数类型: {index_type}")
+        logger.error("不支持的指数类型: %s", index_type)
         return None
 
     try:
@@ -69,15 +69,19 @@ def get_stock_index(index_type: str = "sh") -> dict | None:
                     "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 }
             else:
-                logger.warning(f"获取{INDEX_NAMES[index_type]}数据格式不正确")
+                logger.warning("获取%s数据格式不正确", INDEX_NAMES[index_type])
         else:
-            logger.warning(f"获取{INDEX_NAMES[index_type]}数据HTTP状态码: {response.status_code}")
+            logger.warning("获取%s数据HTTP状态码: %s", INDEX_NAMES[index_type], response.status_code)
         return None
     except requests.RequestException as e:
-        logger.error(f"请求{INDEX_NAMES[index_type]}数据时出错: {e}")
+        logger.error("请求%s数据时出错: %s", INDEX_NAMES[index_type], e)
         return None
-    except Exception as e:
-        logger.error(f"获取{INDEX_NAMES[index_type]}数据时出错: {e}")
+    except (ValueError, TypeError, KeyError) as e:
+        logger.error("解析%s数据时出错: %s", INDEX_NAMES[index_type], e)
+        return None
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有未预见的异常，确保API调用失败不会导致程序崩溃
+        logger.error("获取%s数据时出错: %s", INDEX_NAMES[index_type], e)
         return None
 
 

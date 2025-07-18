@@ -29,16 +29,16 @@ def is_market_open() -> bool:
         bool: 如果当前是交易时间则返回True，否则返回False。
     """
     now = datetime.now()
-    logger.debug(f"检查市场开放状态: 当前时间 {now}")
+    logger.debug("检查市场开放状态: 当前时间 %s", now)
 
     # 检查是否为工作日（排除法定节假日）
     if not chinesecalendar.is_workday(now.date()):
-        logger.info(f"{now.date()} 不是工作日，市场关闭")
+        logger.info("%s 不是工作日，市场关闭", now.date())
         return False
 
     # 检查是否为周一至周五
     if now.weekday() >= 5:
-        logger.info(f"{now.date()} 是周末，市场关闭")
+        logger.info("%s 是周末，市场关闭", now.date())
         return False
 
     # 检查交易时间段
@@ -51,10 +51,10 @@ def is_market_open() -> bool:
     if (morning_start <= current_time <= morning_end) or (
         afternoon_start <= current_time <= afternoon_end
     ):
-        logger.debug(f"当前时间 {current_time} 在交易时段内，市场开放")
+        logger.debug("当前时间 %s 在交易时段内，市场开放", current_time)
         return True
 
-    logger.info(f"当前时间 {current_time} 不在交易时段内，市场关闭")
+    logger.info("当前时间 %s 不在交易时段内，市场关闭", current_time)
     return False
 
 
@@ -87,18 +87,20 @@ class Scheduler:
         interval = self.intervals.get(asset_name, 60)
 
         logger.debug(
-            f"检查是否应获取 {asset_name} 数据: 上次获取时间: {self.last_fetch_times[asset_name]}, 间隔: {interval}秒, 已过时间: {time_since_last_fetch:.1f}秒"
+            "检查是否应获取 %s 数据: 上次获取时间: %s, 间隔: %s秒, 已过时间: %.1f秒",
+            asset_name, self.last_fetch_times[asset_name], interval, time_since_last_fetch
         )
 
         if time_since_last_fetch >= interval:
             if asset_name == "indices" and not is_market_open():
                 logger.info("当前为休市时间，跳过获取股指数据")
                 return False  # 休市期间不获取股指数据
-            logger.debug(f"应该获取 {asset_name} 数据")
+            logger.debug("应该获取 %s 数据", asset_name)
             return True
 
         logger.debug(
-            f"暂不需要获取 {asset_name} 数据，距离下次获取还有 {interval - time_since_last_fetch:.1f} 秒"
+            "暂不需要获取 %s 数据，距离下次获取还有 %.1f 秒",
+            asset_name, interval - time_since_last_fetch
         )
         return False
 
@@ -111,8 +113,10 @@ class Scheduler:
         current_time = time.time()
         self.last_fetch_times[asset_name] = current_time
         logger.debug(
-            f"已更新 {asset_name} 的最后获取时间: {current_time} ({datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')})"
+            "已更新 %s 的最后获取时间: %s (%s)",
+            asset_name, current_time, datetime.fromtimestamp(current_time).strftime('%Y-%m-%d %H:%M:%S')
         )
         logger.debug(
-            f"下次获取 {asset_name} 数据的时间: {datetime.fromtimestamp(current_time + self.intervals.get(asset_name, 60)).strftime('%Y-%m-%d %H:%M:%S')}"
+            "下次获取 %s 数据的时间: %s",
+            asset_name, datetime.fromtimestamp(current_time + self.intervals.get(asset_name, 60)).strftime('%Y-%m-%d %H:%M:%S')
         )

@@ -15,7 +15,7 @@ from datetime import datetime
 import pandas as pd
 
 # 本地模块导入
-from data_storage import CsvStorage
+from data_storage import CsvStorage, Storage
 from exchange_rate import get_exchange_rate
 from gold_price import get_gold_price
 from scheduler import Scheduler
@@ -107,18 +107,18 @@ def fetch_exchange_rate(scheduler: Scheduler, exchange_rate_data: pd.DataFrame, 
         return True, False
     else:
         error_counts["exchange_rate"] += 1
-        logger.warning(f"获取汇率数据失败，尝试次数: {error_counts['exchange_rate']}")
+        logger.warning("获取汇率数据失败，尝试次数: %s", error_counts['exchange_rate'])
         if error_counts["exchange_rate"] >= max_retries:
             logger.error("获取汇率数据连续失败次数过多，停止监控。")
             return False, True  # 返回失败且应该停止监控
         return False, False
 
 
-def save_data(storage: CsvStorage, gold_data: 'pd.DataFrame', indices_data: 'pd.DataFrame', exchange_rate_data: 'pd.DataFrame') -> None:
+def save_data(storage: 'Storage', gold_data: 'pd.DataFrame', indices_data: 'pd.DataFrame', exchange_rate_data: 'pd.DataFrame') -> None:
     """保存所有数据到存储.
 
     Args:
-        storage: 存储实例。
+        storage: 存储实例，必须是Storage的子类实例。
         gold_data: 黄金价格数据。
         indices_data: 股指数据。
         exchange_rate_data: 汇率数据。
@@ -126,8 +126,11 @@ def save_data(storage: CsvStorage, gold_data: 'pd.DataFrame', indices_data: 'pd.
     try:
         storage.save(gold_data, indices_data, exchange_rate_data)
         logger.debug("数据已成功保存")
-    except Exception as e:
-        logger.error(f"保存数据时出错: {e}")
+    except (IOError, PermissionError) as e:
+        logger.error("保存数据时文件操作错误: %s", e)
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有异常以确保监控循环不会因数据保存失败而中断
+        logger.error("保存数据时出错: %s", e)
 
 
 def monitor_prices(intervals: dict[str, int]) -> None:
@@ -188,8 +191,9 @@ def monitor_prices(intervals: dict[str, int]) -> None:
         # 保存最终数据
         save_data(storage, gold_data, indices_data, exchange_rate_data)
         logger.info("数据已保存")
-    except Exception as e:
-        logger.error(f"监控过程中出错: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有异常以记录错误并尝试保存数据
+        logger.error("监控过程中出错: %s", e)
         # 尝试保存已收集的数据
         save_data(storage, gold_data, indices_data, exchange_rate_data)
 
@@ -213,6 +217,7 @@ def main() -> None:
 if __name__ == "__main__":
     try:
         main()
-    except Exception as e:
-        logger.critical(f"程序运行出错: {e}")
-        raise
+    except Exception as e:  # pylint: disable=broad-except
+        # 主程序入口点需要捕获所有异常以确保错误被记录
+        logger.critical("程序运行出错: %s", e)
+        raise  # 重新抛出异常，允许程序以非零状态退出

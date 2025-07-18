@@ -8,8 +8,6 @@
 
 import logging
 from pathlib import Path
-from typing import Any, Never
-
 import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -21,31 +19,32 @@ class Storage:
     定义了数据存储的基本接口，所有具体的存储实现都应该继承此类。
     """
 
-    def load(self, *args: Any, **kwargs: Any) -> Never:  # noqa: ANN401
+    def load(self) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
         """加载数据的抽象方法.
         
-        Args:
-            *args: 可变位置参数。
-            **kwargs: 可变关键字参数。
-            
+        该方法需要被子类实现，用于从存储介质加载数据。
+        
         Returns:
-            Never: 该方法不会返回，而是抛出异常。
-            
+            tuple: 包含三个DataFrame的元组，按顺序分别为：
+                - 黄金价格数据
+                - 股指数据
+                - 汇率数据
+        
         Raises:
             NotImplementedError: 该方法需要被子类实现。
         """
         raise NotImplementedError
 
-    def save(self, *args: Any, **kwargs: Any) -> Never:  # noqa: ANN401
+    def save(self, gold_data: pd.DataFrame, indices_data: pd.DataFrame, exchange_rate_data: pd.DataFrame) -> None:
         """保存数据的抽象方法.
         
+        该方法需要被子类实现，用于将数据保存到存储介质。
+        
         Args:
-            *args: 可变位置参数。
-            **kwargs: 可变关键字参数。
-            
-        Returns:
-            Never: 该方法不会返回，而是抛出异常。
-            
+            gold_data: 黄金价格数据DataFrame。
+            indices_data: 股指数据DataFrame。
+            exchange_rate_data: 汇率数据DataFrame。
+        
         Raises:
             NotImplementedError: 该方法需要被子类实现。
         """
@@ -116,10 +115,15 @@ class CsvStorage(Storage):
         if file_path.exists():
             try:
                 data = pd.read_csv(file_path)
-                logger.info(f"已加载{data_name}数据，共{len(data)}条记录")
+                logger.info("已加载%s数据，共%s条记录", data_name, len(data))
                 return data
-            except Exception as e:
-                logger.error(f"加载{data_name}数据出错: {e}")
+            except pd.errors.ParserError as e:
+                logger.error("解析%s数据出错: %s", data_name, e)
+            except (IOError, FileNotFoundError) as e:
+                logger.error("读取%s文件出错: %s", data_name, e)
+            except Exception as e:  # pylint: disable=broad-except
+                # 捕获其他未预见的异常，确保程序不会崩溃
+                logger.error("加载%s数据出错: %s", data_name, e)
         return pd.DataFrame(columns=columns)
 
     def save(self, gold_data: pd.DataFrame, indices_data: pd.DataFrame, exchange_rate_data: pd.DataFrame) -> None:
@@ -140,5 +144,8 @@ class CsvStorage(Storage):
             indices_data.to_csv(self.indices_data_file, index=False)
             exchange_rate_data.to_csv(self.exchange_rate_data_file, index=False)
             logger.debug("数据已保存到CSV文件")
-        except Exception as e:
-            logger.error(f"保存数据出错: {e}")
+        except (IOError, PermissionError) as e:
+            logger.error("保存数据时文件操作错误: %s", e)
+        except Exception as e:  # pylint: disable=broad-except
+            # 捕获其他未预见的异常，确保程序不会崩溃
+            logger.error("保存数据出错: %s", e)

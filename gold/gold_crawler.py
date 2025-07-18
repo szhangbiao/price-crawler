@@ -46,8 +46,9 @@ def get_gold_price() -> dict | None:
         # 如果两者都失败，返回None
         logger.warning("无法从任何来源获取黄金价格")
         return None
-    except Exception as e:
-        logger.error(f"获取黄金价格时出错: {e}")
+    except Exception as e:  # pylint: disable=broad-except
+        # 捕获所有异常以确保爬虫失败不会影响主程序运行
+        logger.error("获取黄金价格时出错: %s", e)
         return None
 
 
