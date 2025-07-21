@@ -12,8 +12,8 @@ import logging
 
 # 导入爬虫模块
 from .cngold_playwright_crawler import get_gold_price as get_gold_price_from_cngold_playwright
-from .goldprice_crawler import get_gold_price_from_goldprice
-from .juhe_api import get_gold_price_fallback, get_gold_price_from_juhe
+from .goldpricez_playwright_crawler import get_gold_price_from_goldprice
+from .juhe_gold_api import get_gold_price_fallback, get_gold_price_from_juhe
 
 # 获取logger
 logger = logging.getLogger(__name__)
