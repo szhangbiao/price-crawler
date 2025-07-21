@@ -1,0 +1,23 @@
+{
+    "cngold": {
+        "type": "crawler",
+        "interval": 60,
+        "max_retries": 2,
+        "timeout": 30
+    },
+    "goldpricez": {},
+    "juhe": {
+        "type": "request",
+        "interval": 1800,
+        "max_retries": 3,
+        "timeout": 10,
+        "max_request": 50,
+        "time_limit": true
+    },
+    "sina": {
+        "type": "request",
+        "interval": 60,
+        "max_retries": 3,
+        "timeout": 10
+    }
+}
