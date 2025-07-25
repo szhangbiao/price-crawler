@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>市场价格报告</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .timestamp {
+            margin-top: 10px;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            padding: 15px 20px;
+            font-weight: bold;
+            font-size: 18px;
+            color: white;
+        }
+        .gold-header {
+            background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+        }
+        .exchange-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .stock-header {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .section-content {
+            padding: 20px;
+            background-color: #fafafa;
+        }
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .data-item {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .data-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 5px;
+        }
+        .data-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+        }
+        .positive {
+            color: #27ae60;
+        }
+        .negative {
+            color: #e74c3c;
+        }
+        .stock-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .stock-table th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #555;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .stock-table td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .stock-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            border-top: 1px solid #dee2e6;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 10px;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+            .data-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 市场价格报告</h1>
+            <div class="timestamp">更新时间: {{timestamp}}</div>
+        </div>
+        
+        <div class="content">
+            <!-- 黄金价格部分 -->
+            <div class="section">
+                <div class="section-header gold-header">
+                    🥇 黄金价格 ({{gold.variety}})
+                </div>
+                <div class="section-content">
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <div class="data-label">最新价格</div>
+                            <div class="data-value">¥{{gold.latestpri}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">涨跌幅</div>
+                            <div class="data-value {{gold.limit.startsWith('-') ? 'negative' : 'positive'}}">{{gold.limit}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">开盘价</div>
+                            <div class="data-value">¥{{gold.openpri}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">昨收价</div>
+                            <div class="data-value">¥{{gold.yespri}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">最高价</div>
+                            <div class="data-value">¥{{gold.maxpri}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">最低价</div>
+                            <div class="data-value">¥{{gold.minpri}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">成交量</div>
+                            <div class="data-value">{{gold.totalvol}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 汇率部分 -->
+            <div class="section">
+                <div class="section-header exchange-header">
+                    💱 汇率信息
+                </div>
+                <div class="section-content">
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <div class="data-label">货币对</div>
+                            <div class="data-value">{{exchangeRate.currencyF_Name}} / {{exchangeRate.currencyT_Name}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">汇率</div>
+                            <div class="data-value">{{exchangeRate.exchange}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">兑换结果</div>
+                            <div class="data-value">{{exchangeRate.currencyFD}} {{exchangeRate.currencyF}} = {{exchangeRate.result}} {{exchangeRate.currencyT}}</div>
+                        </div>
+                        <div class="data-item">
+                            <div class="data-label">更新时间</div>
+                            <div class="data-value">{{exchangeRate.updateTime}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 股票指数部分 -->
+            <div class="section">
+                <div class="section-header stock-header">
+                    📈 股票指数
+                </div>
+                <div class="section-content">
+                    <table class="stock-table">
+                        <thead>
+                            <tr>
+                                <th>指数名称</th>
+                                <th>当前点位</th>
+                                <th>涨跌点数</th>
+                                <th>涨跌幅</th>
+                                <th>成交量</th>
+                                <th>成交额</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{#each stocks}}
+                            <tr>
+                                <td><strong>{{name}}</strong></td>
+                                <td>{{current}}</td>
+                                <td class="{{change < 0 ? 'negative' : 'positive'}}">{{change}}</td>
+                                <td class="{{percent < 0 ? 'negative' : 'positive'}}">{{percent}}%</td>
+                                <td>{{volume}}</td>
+                                <td>{{amount}}</td>
+                            </tr>
+                            {{/each}}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>📧 此邮件由价格监控系统自动发送</p>
+            <p>如有疑问，请联系系统管理员</p>
+        </div>
+    </div>
+</body>
+</html>

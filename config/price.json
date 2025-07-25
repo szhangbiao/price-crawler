@@ -1,0 +1,56 @@
+[
+    {
+        "type": 1,
+        "notification": [
+            "email",
+            "feishu"
+        ],
+        "gold": {
+            "variety": "Au99.99",
+            "latestpri": "774.30",
+            "openpri": "774.10",
+            "maxpri": "775.00",
+            "minpri": "772.20",
+            "limit": "-0.15%",
+            "yespri": "775.45",
+            "totalvol": "552144.00",
+            "time": "2025-07-25 16:24:20"
+        },
+        "exchangeRate": {
+            "currencyF": "USD",
+            "currencyF_Name": "美元",
+            "currencyT": "CNY",
+            "currencyT_Name": "人民币",
+            "currencyFD": "1",
+            "exchange": "7.1686",
+            "result": "7.1686",
+            "updateTime": "2025-07-25 16:20:00"
+        },
+        "stocks": [
+            {
+                "name": "上证指数",
+                "current": 3593.6553,
+                "change": -12.0716,
+                "percent": -0.33,
+                "volume": 6971895,
+                "amount": 82160958
+            },
+            {
+                "name": "深证成指",
+                "current": 11168.14,
+                "change": -24.918,
+                "percent": -0.22,
+                "volume": 724401444,
+                "amount": 96572720
+            },
+            {
+                "name": "创业板指",
+                "current": 2340.06,
+                "change": -5.312,
+                "percent": -0.23,
+                "volume": 34842364,
+                "amount": 11511451
+            }
+        ]
+    }
+]
