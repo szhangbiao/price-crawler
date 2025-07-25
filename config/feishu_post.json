@@ -1,0 +1,72 @@
+{
+    "zh_cn": {
+        "title": "最新价格消息",
+        "content": [
+            [
+                {
+                    "tag": "text",
+                    "text": "黄金：",
+                    "style": [
+                        "bold"
+                    ]
+                },
+                {
+                    "tag": "text",
+                    "text": "{{ $json.gold.latestpri }},{{ $json.gold.limit }}"
+                }
+            ],
+            [
+                {
+                    "tag": "text",
+                    "text": "汇率：",
+                    "style": [
+                        "bold"
+                    ]
+                },
+                {
+                    "tag": "text",
+                    "text": "{{ $json.exchangeRate.currencyF }}/{{ $json.exchangeRate.currencyT }} = {{ $json.exchangeRate.exchange }}"
+                }
+            ],
+            [
+                {
+                    "tag": "text",
+                    "text": "{{ $json.stocks[0].name }}：",
+                    "style": [
+                        "bold"
+                    ]
+                },
+                {
+                    "tag": "text",
+                    "text": "{{ $json.stocks[0].current }}, {{ $json.stocks[0].change }}, {{ $json.stocks[0].percent }}%"
+                }
+            ],
+            [
+                {
+                    "tag": "text",
+                    "text": "{{ $json.stocks[1].name }}：",
+                    "style": [
+                        "bold"
+                    ]
+                },
+                {
+                    "tag": "text",
+                    "text": "{{ $json.stocks[1].current }}, {{ $json.stocks[1].change }}, {{ $json.stocks[1].percent }}%"
+                }
+            ],
+            [
+                {
+                    "tag": "text",
+                    "text": "{{ $json.stocks[2].name }}：",
+                    "style": [
+                        "bold"
+                    ]
+                },
+                {
+                    "tag": "text",
+                    "text": "{{ $json.stocks[2].current }}, {{ $json.stocks[2].change }}, {{ $json.stocks[2].percent }}%"
+                }
+            ]
+        ]
+    }
+}
